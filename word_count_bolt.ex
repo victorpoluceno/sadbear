@@ -1,5 +1,5 @@
 defmodule WordCountBolt do
   def process(value) do
-  	value
+    String.split(value)
   end
 end

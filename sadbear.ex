@@ -4,11 +4,24 @@ defmodule Sadbear do
     run(next_tuple, flow)
   end
 
+  def emit([], []) do
+  end
+
   def emit(value, []) do
   end
 
+  def emit([], flow) do
+  end
+
+  def emit(value, flow) when is_list(value) do
+    [head|tail] = value
+    emit(head, flow)
+    emit(tail, flow)
+  end
+
   def emit(value, flow) do
-  	return = hd(flow).(value)
-  	emit(return, tl(flow))
+    [head|tail] = flow
+    return = head.(value)
+    emit(return, tail)
   end
 end 
