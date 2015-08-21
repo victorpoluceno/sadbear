@@ -7,10 +7,10 @@ defmodule Sadbear do
   def emit([], []) do
   end
 
-  def emit(value, []) do
+  def emit(_, []) do
   end
 
-  def emit([], flow) do
+  def emit([], _) do
   end
 
   def emit(value, flow) when is_list(value) do
