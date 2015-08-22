@@ -1,0 +1,5 @@
+[*.ex,*.exs]
+end_of_line = lf
+insert_final_newline = true
+ident_size=2
+indent_style=space
