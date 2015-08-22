@@ -7,14 +7,14 @@ defmodule Bucket do
   end
 
   @doc """
-  Gets a value from the `bucket` by `key`.
+  Gets a value by `key`.
   """
   def get(key) do
     Agent.get(__MODULE__, &HashDict.get(&1, key))
   end
 
   @doc """
-  Puts the `value` for the given `key` in the `bucket`.
+  Puts the `value` for the given `key`.
   """
   def put(key, value) do
     Agent.update(__MODULE__, &HashDict.put(&1, key, value))
@@ -22,11 +22,16 @@ defmodule Bucket do
 end
 
 defmodule CountBolt do
-
+  @doc """
+  On initialization start a Bucket agent.
+  """
   def initialize() do
     Bucket.start_link()
   end
   
+  @doc """
+  Count words and print.
+  """
   def process(value) do
     count = Bucket.get(value)
     if count == nil do

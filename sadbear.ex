@@ -24,4 +24,4 @@ defmodule Sadbear do
     return = head.(value)
     emit(return, tail)
   end
-end 
+end
