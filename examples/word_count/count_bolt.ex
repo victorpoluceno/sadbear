@@ -28,7 +28,7 @@ defmodule CountBolt do
   def initialize() do
     Bucket.start_link()
   end
-  
+
   @doc """
   Count words and print.
   """
@@ -37,10 +37,10 @@ defmodule CountBolt do
     if count == nil do
       count = 1
     else
-      count = count + 1 
+      count = count + 1
     end
 
     Bucket.put(value, count)
-  	IO.puts("#{value} -> #{count}")
+    IO.puts("#{value} -> #{count}")
   end
 end
