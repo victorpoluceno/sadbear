@@ -1,91 +1,181 @@
 defmodule Bucket do
-  @doc """
-  Starts a new bucket.
-  """
   def start_link do
     Agent.start_link(fn -> HashDict.new end, name: __MODULE__)
   end
 
-  @doc """
-  Gets a value by `key`.
-  """
-  def get(key) do
-    Agent.get(__MODULE__, &HashDict.get(&1, key))
+  def get(key, default) do
+    Agent.get(__MODULE__, &HashDict.get(&1, key, default))
   end
 
-  @doc """
-  Puts the `value` for the given `key`.
-  """
   def put(key, value) do
     Agent.update(__MODULE__, &HashDict.put(&1, key, value))
   end
 end
 
-defmodule Sadbear do
-  def initialize() do
+defmodule SadBear do
+  def initialize do
     Bucket.start_link()
-  end
-
-  def run(topology) do
-    make(topology)
-
-    {{spout, p}}, bolts} = topology
-
-
-
-    pid = Spout.initialize()
-    put('spout', pid)
   end
 
   def make(topology) do
     {spout, bolts} = topology
-    pid = Spout.initialize()
-    update_meta('spout', pid)
+    make_spout(spout)
+    make_bolts(bolts)
 
-
-    meta = get_meta('bolts')
-    meta = make_bolts(bolts, meta)
-    update_meta('bolts', meta)
+    start_bolts(bolts)
+    start_spout(spout)
+    loop()
   end
 
-  def make_bolts(bolts, meta) do
-    [head|tail] = bolts
-    pid = Bolt.initialize()
-    make_bolts(tail, meta ++ [pid])
+  def loop() do
+    loop()
   end
 
-  def make_bolts([], meta) do
-    meta
+  def start_spout(spout) do
+    {name, component, _, next} = spout
+    pids = get_metadata(name)
+    Spout.run(pids, component, get_metadata(next))
   end
 
-  def emit([], []) do
+  def start_bolts([]) do
   end
 
-  def emit(_, []) do
+  def start_bolts(bolts) do
+    [{name, component, _, next}|tail] = bolts
+    IO.puts('Starting: #{name} -> #{next}')
+    pids = get_metadata(name)
+    pids_next = get_metadata(next)
+    #IO.puts(inspect(pids))
+    #IO.puts(inspect(pids_next))
+    Bolt.run(pids, component, pids_next)
+    start_bolts(tail)
   end
 
-  def emit([], _) do
+  def make_spout(spout) do
+    {name, _, p, _} = spout
+    make_spout(name, p)
   end
 
-  def emit(value, flow) when is_list(value) do
-    [head|tail] = value
-    emit(head, flow)
-    emit(tail, flow)
+  def make_spout(name, p) when p > 0 do
+    case Spout.initialize() do
+      {:ok, pid} ->
+        metadata = get_metadata(name)
+        update_metadata(name, metadata ++ [pid])
+        make_spout(name, p - 1)
+      {:error, reason} ->
+        raise 'Failed to initialize spout: #{reason}'
+    end
   end
 
-  def emit(value, flow) do
-    [head|tail] = flow
-    return = head.(value)
-    emit(return, tail)
+  def make_spout(_, 0) do
   end
-end
 
-defmodule Spout do
-  def initialize() do
+  def make_bolts([]) do
+  end
+
+  def make_bolts(bolts) do
+    [{name, _, p, _}|tail] = bolts
+    make_bolts(name, p)
+    make_bolts(tail)
+  end
+
+  def make_bolts(name, p) when p > 0 do
+    case Bolt.initialize() do
+      {:ok, pid} ->
+        metadata = get_metadata(name)
+        IO.puts('Initializing: #{name}, #{p}')
+        update_metadata(name, metadata ++ [pid])
+        make_bolts(name, p - 1)
+      {:error, reason} ->
+        raise 'Failed to initialize bolt: #{reason}'
+    end
+  end
+
+  def make_bolts(_, 0) do
+  end
+
+  def get_metadata(name) do
+    Bucket.get(name, [])
+  end
+
+  defp update_metadata(name, metadata) do
+    Bucket.put(name, metadata)
   end
 end
 
 defmodule Bolt do
   def initialize() do
+    Task.start_link(fn -> loop(%{}) end)
+  end
+
+  def run(pids, component, []) do
+    pid = hd(pids)
+    send pid, {:run, component, nil}
+  end
+
+  def run(pids, component, next_pids) do
+    pid = hd(pids)
+    pid_next = hd(next_pids)
+    send pid, {:run, component, pid_next}
+  end
+
+  defp loop(map) do
+    receive do
+      {:run, component, pid_next} ->
+        map = Map.put(map, 'self', {component, pid_next})
+        component.initialize()
+        loop(map)
+      {:process, value} ->
+        {component, pid_next} = Map.get(map, 'self')
+        value = component.process(value)
+        process(pid_next, value)
+        loop(map)
+    end
+  end
+
+  defp process(_, []) do
+  end
+
+  defp process(pid_next, value) when is_list(value) do
+    [head|tail] = value
+    process(pid_next, head)
+    process(pid_next, tail)
+  end
+
+  defp process(pid_next, value) do
+    if pid_next != nil do
+      send pid_next, {:process, value}
+    end
+  end
+end
+
+defmodule Spout do
+  def initialize() do
+    Task.start_link(fn -> loop(nil) end)
+  end
+
+  def run(pids, component, next_pids) do
+    pid = hd(pids)
+    pid_next = hd(next_pids)
+    send pid, {:initialize, component}
+    send pid, {:run, pid_next, component}
+  end
+
+  defp loop(context) do
+    receive do
+      {:run, pid_next, component} ->
+        next_tuple(pid_next, component, context)
+      {:initialize, component} ->
+        context = component.initialize()
+        loop(context)
+    end
+  end
+
+  defp next_tuple(pid_next, component, context) do
+    {value, context} = component.next_tuple(context)
+    if value do
+      send pid_next, {:process, value}
+    end
+    next_tuple(pid_next, component, context)
   end
 end

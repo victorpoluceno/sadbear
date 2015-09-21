@@ -1,16 +1,9 @@
-import Sadbear
+import SadBear
 import LineSpout
 import SplitBolt
 import CountBolt
 
-
-
-SplitBolt.initialize()
-CountBolt.initialize()
-
-
-topology = {{'line', LineSpout, 1}, [{'split', SplitBolt, 2}, {'count', CountBolt, 2}]}
-Sadbear.run(topology)
-
-
-#Sadbear.run(&LineSpout.next_tuple/0, [&SplitBolt.process/1, &CountBolt.process/1])
+topology = {{'line', LineSpout, 1, 'split'},
+  [{'split', SplitBolt, 2, 'count'}, {'count', CountBolt, 1, nil}]}
+SadBear.initialize()
+SadBear.make(topology)
