@@ -1,4 +1,4 @@
-defmodule Bucket do
+defmodule BucketX do
   @doc """
   Starts a new bucket.
   """
@@ -26,21 +26,21 @@ defmodule CountBolt do
   On initialization start a Bucket agent.
   """
   def initialize() do
-    Bucket.start_link()
+    BucketX.start_link()
   end
 
   @doc """
   Count words and print.
   """
   def process(value) do
-    count = Bucket.get(value)
+    count = BucketX.get(value)
     if count == nil do
       count = 1
     else
       count = count + 1
     end
 
-    Bucket.put(value, count)
+    BucketX.put(value, count)
     IO.puts("#{value} -> #{count}")
   end
 end

@@ -32,10 +32,16 @@ malesuada. Mauris in ante nec erat
 lobortis eleifend. Morbi condimentum interdum elit,
 quis iaculis ante pharetra id. In"
 
-  @doc """
-  Emit lines from a text.
-  """
-  def next_tuple() do
+  def initialize() do
     String.split(@text, "\n")
+  end
+
+  def next_tuple([]) do
+    {nil, []}
+  end
+
+  def next_tuple(context) do
+    [head|tail] = context
+    {head, tail}
   end
 end
