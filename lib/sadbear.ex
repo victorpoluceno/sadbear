@@ -1,17 +1,3 @@
-defmodule Bucket do
-  def start_link do
-    Agent.start_link(fn -> HashDict.new end, name: __MODULE__)
-  end
-
-  def get(key, default) do
-    Agent.get(__MODULE__, &HashDict.get(&1, key, default))
-  end
-
-  def put(key, value) do
-    Agent.update(__MODULE__, &HashDict.put(&1, key, value))
-  end
-end
-
 defmodule SadBear do
   def initialize do
     Bucket.start_link()
