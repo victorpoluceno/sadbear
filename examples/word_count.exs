@@ -67,6 +67,10 @@ quis iaculis ante pharetra id. In"
     {nil, []}
   end
 
+  def next_tuple(nil) do
+    {nil, []}
+  end
+
   def next_tuple(context) do
     [head|tail] = context
     {head, tail}
