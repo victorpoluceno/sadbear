@@ -26,6 +26,8 @@ defmodule CountBolt do
 end
 
 defmodule LineSpout do
+  use Spout
+
   @text "Lorem ipsum dolor sit amet, consectetur
 adipiscing elit. Curabitur pharetra ante eget
 nunc blandit vestibulum. Curabitur tempus mi
@@ -64,15 +66,9 @@ quis iaculis ante pharetra id. In"
   end
 
   def next_tuple([]) do
-    {nil, []}
   end
 
-  def next_tuple(nil) do
-    {nil, []}
-  end
-
-  def next_tuple(context) do
-    [head|tail] = context
+  def next_tuple([head|tail]) do
     {head, tail}
   end
 end

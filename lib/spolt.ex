@@ -1,3 +1,10 @@
+# TODO: is clear now that we can use GenServer here
+
+defmodule SpoutBehavior do
+  @callback initialize() :: any
+  @callback next_tuple(context :: any) :: nil | Tuple.t
+end
+
 defmodule Spout do
 
   @doc """
@@ -8,13 +15,23 @@ defmodule Spout do
   end
 
   def initialize(pid, component, next_pids) do
-    send pid, {:initialize, component}
-    send pid, {:run, next_pids, component}
+    send(pid, {:initialize, component})
+  end
+
+  def run(pid, component, next_pids) do
+    send(pid, {:run, next_pids, component})
+  end
+
+  defmacro __using__(_opts) do
+    quote do
+      @behaviour SpoutBehavior
+    end
   end
 
   defp loop(context) do
     receive do
       {:initialize, component} ->
+        IO.puts('Initializing spout...')
         context = component.initialize()
         loop(context)
       {:run, next_pids, component} ->
@@ -23,15 +40,18 @@ defmodule Spout do
   end
 
   defp next_tuple(next_pids, component, context) do
-    {value, context} = component.next_tuple(context)
-    if length(next_pids) != 0 do
-      # TODO: this is where we need to implement logic
-      # routing mecanics, like random, field, etc
-      next_pid = hd(next_pids)
-      if value do
+    result = component.next_tuple(context)
+    if result do
+      {value, context} = result
+      if length(next_pids) != 0 do
+        # TODO: this is where we need to implement logic
+        # routing mecanics, like random, field, etc
+        next_pid = hd(next_pids)
         Bolt.process(next_pid, value)
       end
+      next_tuple(next_pids, component, context)
+    else
+      next_tuple(next_pids, component, nil)
     end
-    next_tuple(next_pids, component, context)
   end
 end
