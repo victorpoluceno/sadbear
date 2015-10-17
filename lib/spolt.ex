@@ -1,11 +1,9 @@
 # TODO: is clear now that we can use GenServer here
 
-defmodule SpoutBehavior do
+defmodule Spout do
+
   @callback initialize() :: any
   @callback next_tuple(context :: any) :: nil | Tuple.t
-end
-
-defmodule Spout do
 
   @doc """
   Starts a new Spolt.
@@ -24,7 +22,7 @@ defmodule Spout do
 
   defmacro __using__(_opts) do
     quote do
-      @behaviour SpoutBehavior
+      @behaviour Spout
     end
   end
 
