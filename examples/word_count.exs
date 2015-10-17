@@ -2,6 +2,8 @@ import SadBear
 import Bucket
 
 defmodule CountBolt do
+  use Bolt
+
   @doc """
   On initialization start a Bucket agent.
   """
@@ -65,6 +67,13 @@ quis iaculis ante pharetra id. In"
     String.split(@text, "\n")
   end
 
+  # FIXME this sucks, need to find a way to
+  # don't need this methods
+  def next_tuple(nil) do
+  end
+
+  # FIXME this sucks, need to find a way to
+  # don't need this methods
   def next_tuple([]) do
   end
 
@@ -74,6 +83,8 @@ quis iaculis ante pharetra id. In"
 end
 
 defmodule SplitBolt do
+  use Bolt
+
   @doc """
   """
   def initialize() do

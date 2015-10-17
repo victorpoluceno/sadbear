@@ -66,9 +66,13 @@ defmodule SadBear do
     start_spout(pids, component, get_metadata(next))
   end
 
+  def start_spout([], _, _) do
+  end
+
   def start_spout(pids, component, pids_next) do
     [pid|tail] = pids
     Spout.initialize(pid, component, pids_next)
+    Spout.run(pid, component, pids_next)
     start_spout(tail, component, pids_next)
   end
 
