@@ -6,16 +6,24 @@ defmodule Spout do
   @callback next_tuple(context :: any) :: nil | Tuple.t
 
   @doc """
-  Starts a new Spolt.
+  Starts a new Spout.
   """
   def start_link() do
     Task.start_link(fn -> loop(nil) end)
   end
 
+  @doc """
+  Initialize the Spout for the `pid` with `component` and `next_pids`
+  as a list of next bolt. Spout.initialize function will be called.
+  """
   def initialize(pid, component, next_pids) do
     send(pid, {:initialize, component})
   end
 
+  @doc """
+  Start the run loop for the `pid` with `component` and `next_pids`
+  as a list of next bolt. Spout.next_tuple function will be called.
+  """
   def run(pid, component, next_pids) do
     send(pid, {:run, next_pids, component})
   end
