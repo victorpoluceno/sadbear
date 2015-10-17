@@ -1,5 +1,8 @@
 defmodule Bolt do
 
+  @callback initialize() :: any
+  @callback process(value :: any) :: any
+
   @doc """
   Starts a new Bolt.
   """
@@ -22,6 +25,12 @@ defmodule Bolt do
   """
   def process(pid, value) do
     send(pid, {:process, value})
+  end
+
+  defmacro __using__(_opts) do
+    quote do
+      @behaviour Bolt
+    end
   end
 
   defp loop(map) do

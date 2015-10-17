@@ -20,6 +20,8 @@ defmodule SadBearTest.Bucket do
 end
 
 defmodule TestBolt do
+  use Bolt
+
   def initialize() do
     send(:test, {:called_back})
   end
@@ -31,6 +33,8 @@ defmodule TestBolt do
 end
 
 defmodule TestBoltNext do
+  use Bolt
+
   def initialize() do
   end
 
@@ -89,6 +93,8 @@ defmodule TestSpout do
 end
 
 defmodule TestSpoutBoltNext do
+  use Bolt
+
   def initialize() do
   end
 
