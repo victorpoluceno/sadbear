@@ -13,16 +13,16 @@ defmodule SadBear do
     loop()
   end
 
-  def loop() do
+  defp loop() do
     loop()
   end
 
-  def make_spout(spout) do
+  defp make_spout(spout) do
     {name, _, p, _} = spout
     make_spout(name, p)
   end
 
-  def make_spout(name, p) when p > 0 do
+  defp make_spout(name, p) when p > 0 do
     case Spout.start_link() do
       {:ok, pid} ->
         metadata = get_metadata(name)
@@ -33,19 +33,19 @@ defmodule SadBear do
     end
   end
 
-  def make_spout(_, 0) do
+  defp make_spout(_, 0) do
   end
 
-  def make_bolts([]) do
+  defp make_bolts([]) do
   end
 
-  def make_bolts(bolts) do
+  defp make_bolts(bolts) do
     [{name, _, p, _}|tail] = bolts
     make_bolts(name, p)
     make_bolts(tail)
   end
 
-  def make_bolts(name, p) when p > 0 do
+  defp make_bolts(name, p) when p > 0 do
     case Bolt.start_link() do
       {:ok, pid} ->
         metadata = get_metadata(name)
@@ -57,7 +57,7 @@ defmodule SadBear do
     end
   end
 
-  def make_bolts(_, 0) do
+  defp make_bolts(_, 0) do
   end
 
   def start_spout(spout) do
@@ -66,7 +66,7 @@ defmodule SadBear do
     start_spout(pids, component, get_metadata(next))
   end
 
-  def start_spout([], _, _) do
+  defp start_spout([], _, _) do
   end
 
   def start_spout(pids, component, pids_next) do
@@ -76,10 +76,10 @@ defmodule SadBear do
     start_spout(tail, component, pids_next)
   end
 
-  def start_bolts([]) do
+  defp start_bolts([]) do
   end
 
-  def start_bolts(bolts) do
+  defp start_bolts(bolts) do
     [{name, component, _, next}|tail] = bolts
     IO.puts('Starting: #{name} -> #{next}')
     pids = get_metadata(name)
