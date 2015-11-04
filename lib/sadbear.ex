@@ -1,6 +1,10 @@
 defmodule SadBear do
+
+  @doc """
+  Initialize SadBear.
+  """
   def initialize do
-    Bucket.start_link()
+    {:ok, _} = Bucket.start_link(:sadbear)
   end
 
   def make(topology) do
@@ -10,11 +14,10 @@ defmodule SadBear do
 
     start_bolts(bolts)
     start_spout(spout)
-    loop()
   end
 
-  defp loop() do
-    loop()
+  defp run() do
+    run()
   end
 
   defp make_spout(spout) do
@@ -69,7 +72,7 @@ defmodule SadBear do
   defp start_spout([], _, _) do
   end
 
-  def start_spout(pids, component, pids_next) do
+  defp start_spout(pids, component, pids_next) do
     [pid|tail] = pids
     Spout.initialize(pid, component, pids_next)
     Spout.run(pid, component, pids_next)
@@ -98,10 +101,10 @@ defmodule SadBear do
   end
 
   def get_metadata(name) do
-    Bucket.get(name, [])
+    Bucket.get(:sadbear, name, [])
   end
 
   defp update_metadata(name, metadata) do
-    Bucket.put(name, metadata)
+    Bucket.put(:sadbear, name, metadata)
   end
 end

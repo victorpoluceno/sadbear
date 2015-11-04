@@ -103,3 +103,4 @@ topology = {{'line', LineSpout, 1, 'split'},
   [{'split', SplitBolt, 2, 'count'}, {'count', CountBolt, 1, nil}]}
 SadBear.initialize()
 SadBear.make(topology)
+SadBear.run()

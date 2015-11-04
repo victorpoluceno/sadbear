@@ -1,8 +1,21 @@
-defmodule SadBearTest do
-  use ExUnit.Case
+defmodule TestSpoutSadBear do
+  use Spout
 
-  test "the truth" do
-    assert 1 + 1 == 2
+  def initialize() do
+  end
+
+  def next_tuple(_context) do
+  end
+end
+
+defmodule SadBearTest do
+  use ExUnit.Case, async: true
+
+  test "sadbear initialize and make" do
+    SadBear.initialize()
+
+    topology = {{'test_spout', TestSpoutSadBear, 1, nil}, []}
+    SadBear.make(topology)
   end
 end
 
@@ -10,12 +23,13 @@ defmodule SadBearTest.Bucket do
   use ExUnit.Case, async: true
 
   test "stores values by key" do
-    {:ok, _} = Bucket.start_link
-    assert Bucket.get("milk") == nil
-    assert Bucket.get("milk", 0) == 0
+    {:ok, _} = Bucket.start_link(:test_bucket)
 
-    Bucket.put("milk", 3)
-    assert Bucket.get("milk") == 3
+    assert Bucket.get(:test_bucket, "milk") == nil
+    assert Bucket.get(:test_bucket, "milk", 0) == 0
+
+    Bucket.put(:test_bucket, "milk", 3)
+    assert Bucket.get(:test_bucket, "milk") == 3
   end
 end
 

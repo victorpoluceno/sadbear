@@ -1,5 +1,3 @@
-# TODO: is clear now that we can use GenServer here
-
 defmodule Spout do
 
   @callback initialize() :: any
