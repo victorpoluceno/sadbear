@@ -2,9 +2,12 @@ defmodule TestSpoutSadBear do
   use Spout
 
   def initialize() do
+    send(:test_sadbear, :called_back)
   end
 
   def next_tuple(_context) do
+    send(:test_sadbear, :called_back_from_next)
+    nil
   end
 end
 
@@ -12,10 +15,19 @@ defmodule SadBearTest do
   use ExUnit.Case, async: true
 
   test "sadbear initialize and make" do
+    Process.register self, :test_sadbear
     SadBear.initialize()
 
     topology = {{'test_spout', TestSpoutSadBear, 1, nil}, []}
     SadBear.make(topology)
+
+    pids = Bucket.get(:sadbear, 'test_spout')
+    assert length(pids) == 1
+    assert_receive(:called_back)
+    assert_receive(:called_back_from_next)
+
+    # TODO add tests to bold create and initlizate
+    # and also test paralelism of more than 1
   end
 end
 

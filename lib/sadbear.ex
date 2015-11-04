@@ -52,7 +52,6 @@ defmodule SadBear do
     case Bolt.start_link() do
       {:ok, pid} ->
         metadata = get_metadata(name)
-        IO.puts('Initializing: #{name}, #{p}')
         update_metadata(name, metadata ++ [pid])
         make_bolts(name, p - 1)
       {:error, reason} ->
